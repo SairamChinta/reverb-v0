@@ -1,141 +1,148 @@
-"use client";
-import { Button } from "@/components/ui/button";
-//@ts-ignore
-import { Music, Radio, Users, Wand2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Appbar } from "@/app/components/Appbar";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+"use client"
+
+import { Button } from "@/components/ui/button"
+// @ts-ignore
+import { Music, Radio, Users, Wand2 } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Appbar } from "@/app/components/Appbar"
+import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 export default function Landingpage() {
-  const router = useRouter();
-  const { data: session } = useSession();
+  const router = useRouter()
+  const { data: session } = useSession()
 
   const handleStartStreaming = () => {
-    if (session?.user) {
-      router.push("/streamspage");
-    } else {
-      router.push("/api/auth/signin"); // or your custom login route
-    }
-  };
+    if (session?.user) router.push("/streamspage")
+    else router.push("/api/auth/signin")
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-background/95">
+    <div className="min-h-screen font-vibe bg-slate-900 text-white">
       <Appbar />
 
-      {/* Hero Section */}
-      <section className="container pt-32 pb-16">
-        <div className="relative">
-          <div className="absolute inset-0 -z-10">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-500/20 blur-3xl opacity-25" />
-          </div>
-          <div className="max-w-3xl mx-auto text-center space-y-8">
-            <div className="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-sm">
-              <Wand2 className="h-4 w-4 mr-2" />
-              Transform your music streaming experience
-            </div>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl md:text-7xl">
-              Where Music Meets
-              <span className="block bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
-                Interactive Magic
-              </span>
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Create unforgettable streaming experiences where your audience controls the playlist in real-time. Let
-              your fans shape the music journey.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="text-lg" onClick={handleStartStreaming}>
-                Start Streaming
-              </Button>
-              <Button size="lg" variant="outline" className="text-lg">
-                Join as Listener
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* HERO */}
+      <section className="container pt-32 pb-20">
+        <div className="relative mx-auto max-w-4xl text-center space-y-10">
+          {/* neon glow backdrop */}
+          <div className="absolute inset-0 -z-10 blur-3xl opacity-30 bg-[radial-gradient(circle_at_center,_rgba(128,90,213,0.4),transparent_60%)]" />
 
-      {/* Features Section */}
-      <section className="container py-24">
-        <div className="grid gap-12 lg:grid-cols-3">
-          <div className="group relative overflow-hidden rounded-lg border p-8 hover:border-primary/50 transition-colors">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative space-y-4">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                <Radio className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold">Create Your Stream</h3>
-              <p className="text-muted-foreground">
-                Start your music stream and let your audience join in. Set the mood and watch your community grow.
-              </p>
-            </div>
-          </div>
-          <div className="group relative overflow-hidden rounded-lg border p-8 hover:border-primary/50 transition-colors">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative space-y-4">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                <Music className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold">Choose the Music</h3>
-              <p className="text-muted-foreground">
-                Listeners can vote on songs and influence the playlist in real-time, creating a truly interactive
-                experience.
-              </p>
-            </div>
-          </div>
-          <div className="group relative overflow-hidden rounded-lg border p-8 hover:border-primary/50 transition-colors">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative space-y-4">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                <Users className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold">Engage Your Audience</h3>
-              <p className="text-muted-foreground">
-                Build a community around your music taste. Chat, share, and discover new tracks together.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+          <span className="inline-flex items-center gap-2 rounded-full bg-slate-800/60 px-4 py-1 text-sm shadow ring-1 ring-white/10">
+            <Wand2 className="h-4 w-4" /> Vibe check: Passed.
+          </span>
 
-      {/* Email Signup Section */}
-      <section className="container py-24 relative">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/30 via-purple-500/30 to-primary/30 blur-3xl opacity-25" />
-        </div>
-        <div className="max-w-2xl mx-auto text-center space-y-12">
-          <h2 className="text-3xl font-bold sm:text-4xl md:text-5xl">
-            Ready to Revolutionize Your
-            <span className="block bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
-              Music Streaming?
+          <h1 className="text-5xl sm:text-7xl font-extrabold leading-tight tracking-tight text-white">
+            Where&nbsp;Your&nbsp;Audience
+            <span className="block bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 bg-clip-text text-transparent drop-shadow-md">
+              Became the&nbsp;DJ
             </span>
-          </h2>
-          <p className="text-xl text-muted-foreground">
-            Join the waitlist and be the first to experience the future of interactive music streaming.
+          </h1>
+
+          <p className="mx-auto max-w-2xl text-lg text-white/70">
+            Build a stream where anyone can toss in YouTube tracks,
+vote up their faves, and shape the playlist live.
+It's like a house party — but the aux is shared.
           </p>
-          <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <Input type="email" placeholder="Enter your email" className="h-12 text-base" />
-            <Button type="submit" size="lg" className="whitespace-nowrap">
-              Join Waitlist
+
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Button
+              size="lg"
+              className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-600/30"
+              onClick={handleStartStreaming}
+            >
+              Start&nbsp;Streaming
+            </Button>
+
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-purple-600 text-purple-500 hover:bg-purple-600/10"
+            >
+              Join&nbsp;as&nbsp;Listener
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section className="container py-18 px-28">
+        <div className="grid gap-10 lg:grid-cols-3">
+          {[
+            {
+              icon: <Radio className="h-7 w-7" />,
+              title: "Create Your Stream",
+              desc: "Spin up a room and set the vibe. Watch your community grow in seconds.",
+            },
+            {
+              icon: <Music className="h-7 w-7" />,
+              title: "Let Them Choose",
+              desc: "Listeners up-vote songs and drive the playlist while you focus on the mix.",
+            },
+            {
+              icon: <Users className="h-7 w-7" />,
+              title: "Engage the Crowd",
+              desc: "Chat, share reactions, and discover new tracks together — live.",
+            },
+          ].map((f, i) => (
+            <article
+              key={i}
+              className="group relative overflow-hidden rounded-xl bg-slate-800/60 p-10 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-600/30"
+            >
+              {/* subtle glow */}
+              <div className="absolute inset-0 -z-10 opacity-0 group-hover:opacity-100 transition bg-[radial-gradient(circle_at_top_left,_rgba(128,90,213,0.15),transparent_70%)]" />
+              <div className="space-y-5">
+                <div className="inline-flex items-center justify-center h-14 w-14 rounded-lg bg-purple-600/10 text-purple-600">
+                  {f.icon}
+                </div>
+                <h3 className="text-xl font-semibold">{f.title}</h3>
+                <p className="text-white/70">{f.desc}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* WAITLIST */}
+      <section className="container py-28 relative">
+        <div className="absolute inset-0 -z-10 blur-3xl opacity-30 bg-[radial-gradient(circle_at_center,_rgba(128,90,213,0.25),transparent_70%)]" />
+
+        <div className="mx-auto max-w-2xl text-center space-y-12">
+          <h2 className="text-4xl sm:text-5xl font-bold">
+            Ready to&nbsp;<span className="text-purple-500">Revolutionize</span>&nbsp;Your Vibe?
+          </h2>
+
+          <p className="text-lg text-white/70">
+            Join the wait-list and be the first to experience the future of interactive music.
+          </p>
+
+          <form className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+            <Input
+              type="email"
+              placeholder="Your best email"
+              className="h-12 flex-1 rounded-lg bg-white/10 placeholder-white/60 text-white"
+            />
+            <Button
+              type="submit"
+              size="lg"
+              className="bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-600/30"
+            >
+              Join&nbsp;Waitlist
             </Button>
           </form>
-          <p className="text-sm text-muted-foreground">
-            By signing up, you agree to our Terms of Service and Privacy Policy.
+
+          <p className="text-xs text-white/50">
+            By signing up, you agree to our <a href="#" className="underline">Terms</a> and <a href="#" className="underline">Privacy&nbsp;Policy</a>.
           </p>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t px-10">
-        <div className="container py-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <h1 className="font-bold text-2xl italic">reverB</h1>
-            <p className="text-sm text-muted-foreground">©2025 reverB. All rights reserved.</p>
-          </div>
+      {/* FOOTER */}
+      <footer className="border-t border-white/10">
+        <div className="container px-32 flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+         <img src="/reverb-new.png" alt="Logo" className="w-20 h-16" />
+          <span className="text-white/50">&copy; 2025 reverB — All rights reserved.</span>
         </div>
       </footer>
     </div>
   )
 }
-

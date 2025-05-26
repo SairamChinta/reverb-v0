@@ -19,7 +19,7 @@ export function AuthButtons() {
         <>
             {session?.user && (
                 <button
-                    className="text-sm text-muted-foreground hover:text-foreground"
+                    className="text-white/70 hover:text-white"
                     onClick={() => signOut()}
                 >
                     LogOut
@@ -27,7 +27,7 @@ export function AuthButtons() {
             )}
             {!session?.user && (
                 <button
-                    className="text-sm text-muted-foreground hover:text-foreground"
+                    className="text-white/70 hover:text-white"
                     onClick={() => signIn()}
                 >
                     Signin

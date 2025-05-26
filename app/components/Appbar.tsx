@@ -19,30 +19,16 @@ export function Appbar() {
   };
 
   return (
-    <header className="fixed top-0 w-full px-40 z-50 border-b bg-background/80 backdrop-blur-sm bg-pink text-white">
+    <header className="bg-slate-800 fixed top-0 w-full px-40 z-50 border-b border-slate-700 bg-background/80 backdrop-blur-sm bg-pink text-white">
       <nav className="container flex h-16 items-center justify-between">
         <div className="italic text-3xl font-extrabold">
-          <img src="/reverb-bg.png" alt="Logo" className="w-36 h-28" />
-        </div>
-        <div className="hidden md:flex gap-6">
-          <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-            Features
-          </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-            Creators
-          </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-            Listeners
-          </Link>
-          <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-            Pricing
-          </Link>
+          <img src="/reverb-new.png" alt="Logo" className="w-40 h-34" />
         </div>
         <div className="flex items-center gap-4">
           <Providers>
             <AuthButtons />
           </Providers>
-          <Button onClick={handleGetStarted}>Get Started</Button>
+          <Button className="bg-purple-600 hover:bg-purple-700 transition-colors duration-200" onClick={handleGetStarted}>Get Started</Button>
         </div>
       </nav>
     </header>
