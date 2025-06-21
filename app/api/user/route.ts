@@ -30,8 +30,7 @@
 // app/api/user/route.ts
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-//@ts-expect-error
-import { reverbAuthOptions } from "@app/lib/authOptions"
+import { reverbAuthOptions } from "@/app/lib/authOptions"
 import { prismaClient } from "@/app/lib/db"
 
 export async function GET() {
