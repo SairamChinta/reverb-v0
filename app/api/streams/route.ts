@@ -6,7 +6,7 @@ import YouTubeSearch from "youtube-search-api";
 import { YT_REGEX } from "@/app/lib/utils";
 import { getServerSession } from "next-auth/next";
 //@@ts-expect-error: This external lib type is incorrect
-import { reverbAuthOptions } from "@/app/api/auth/[...nextauth]/route";
+import { reverbAuthOptions } from "@/app/lib/authOptions";
 
 const CreateStreamSchema = z.object({
   creatorId: z.string(),

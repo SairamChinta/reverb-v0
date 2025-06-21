@@ -30,12 +30,13 @@
 // app/api/user/route.ts
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import { authOptions } from "../auth/[...nextauth]/route"
+//@ts-expect-error
+import { reverbAuthOptions } from "@app/lib/authOptions"
 import { prismaClient } from "@/app/lib/db"
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(reverbAuthOptions)
 
     if (!session || !session.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
