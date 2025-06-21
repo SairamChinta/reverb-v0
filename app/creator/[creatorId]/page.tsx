@@ -1,7 +1,7 @@
 import StreamView from "@/app/components/StreamView";
 
 
-export default async function Creator({
+export default function Creator({
     params: {
         creatorId
     }
