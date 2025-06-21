@@ -31,7 +31,7 @@ import GoogleProvider from "next-auth/providers/google";
 //       }
 // })
 
-// export {handler as GET, handler as POST}
+//export {handler as GET, handler as POST}
 
 export const authOptions = {
   providers: [
@@ -41,7 +41,8 @@ export const authOptions = {
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET ?? "secret",
-  callbacks: {//@ts-expect-error: This params type is incorrect
+  callbacks: {
+    //@ts-expect-error- `params` typing is incompatible but safe to ignore here
     async signIn(params) {
       if (!params.user.email) return false;
       try {
