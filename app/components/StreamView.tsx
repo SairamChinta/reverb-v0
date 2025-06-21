@@ -10,9 +10,8 @@ import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { YT_REGEX } from "../lib/utils";
 import YouTubePlayer from "youtube-player";
-import { useSession } from "next-auth/react";
-import type { Session } from "next-auth";
 import Image from "next/image";
+import { useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,8 +21,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-
-
 
 interface Video {
   id: string;
@@ -38,15 +35,6 @@ interface Video {
   upvotes: number;
   haveUpvoted: boolean;
   spaceId: string
-}
-
-interface CustomSession extends Omit<Session, "user"> {
-  user: {
-    id: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  };
 }
 
 const REFRESH_INTERVAL_MS = 10 * 1000;
@@ -70,7 +58,7 @@ export default function StreamView({
   const [isEmptyQueueDialogOpen, setIsEmptyQueueDialogOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  async function refreshStreams() {
+  const refreshStreams = useCallback(async () => {
     try {
       const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {//spaceId=${spaceId}
         credentials: "include",
@@ -79,7 +67,7 @@ export default function StreamView({
       if (json.streams && Array.isArray(json.streams)) {
         setQueue(
           json.streams.length > 0
-            ? json.streams.sort((a: any, b: any) => b.upvotes - a.upvotes)
+            ? json.streams.sort((a: Video, b: Video) => b.upvotes - a.upvotes)
             : [],
         );
       } else {
@@ -101,13 +89,13 @@ export default function StreamView({
       setQueue([]);
       setCurrentVideo(null);
     }
-  }
+  },[creatorId]);
 
   useEffect(() => {
     refreshStreams();
     const interval = setInterval(refreshStreams, REFRESH_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, []);
+  }, [refreshStreams]);
 
   useEffect(() => {
     if (!videoPlayerRef.current || !currentVideo) return;
@@ -196,7 +184,7 @@ export default function StreamView({
     });
   };
 
-  const playNext = async () => {
+  const playNext = useCallback(async () => {
     if (queue.length > 0) {
       try {
         setPlayNextLoader(true);
@@ -212,7 +200,7 @@ export default function StreamView({
         setPlayNextLoader(false);
       }
     }
-  };
+  },[queue]);
 
   const handleShare = (platform: 'whatsapp' | 'twitter' | 'instagram' | 'clipboard') => {
     const shareableLink = `${window.location.origin}/creator/${creatorId}`///spaces/${spaceId}`
@@ -281,7 +269,7 @@ export default function StreamView({
       } else {
         toast.error("Failed to remove song");
       }
-    } catch (error) {
+    } catch {
       toast.error("An error occurred while removing the song");
     }
   };

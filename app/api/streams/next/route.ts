@@ -30,7 +30,7 @@ export async function GET (){
                 _count: 'desc'
             }
         }
-    });                //@ts-ignore
+    });                //@@ts-expect-error
     await Promise.all([prismaClient.currentStream.upsert({
         where: {
             userId: user.id

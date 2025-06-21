@@ -1,7 +1,7 @@
 "use client"
-//@ts-ignore
+//@@ts-expect-error
 import { ThemeProvider as NextThemesProvider } from "next-themes"
-//@ts-ignore
+//@@ts-expect-error
 import type { ThemeProviderProps } from "next-themes"
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {

@@ -1,5 +1,4 @@
 import { prismaClient } from "@/app/lib/db";
-import { Provider } from "@prisma/client";
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
@@ -42,14 +41,14 @@ export const authOptions = {
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET ?? "secret",
-  callbacks: {//@ts-ignore
+  callbacks: {//@ts-expect-error
     async signIn(params) {
       if (!params.user.email) return false;
       try {
         await prismaClient.user.create({
           data: { email: params.user.email, provider: "Google" },
         });
-      } catch (e) {
+      } catch  {
         // ignore duplicate error
       }
       return true;

@@ -1,10 +1,10 @@
 "use client";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { AuthButtons } from "./Authbutton";
 import { Providers } from "../Providers";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 export function Appbar() {
   const { data: session } = useSession();
@@ -22,7 +22,13 @@ export function Appbar() {
     <header className="bg-slate-800 fixed top-0 w-full px-40 z-50 border-b border-slate-700 bg-background/80 backdrop-blur-sm bg-pink text-white">
       <nav className="container flex h-16 items-center justify-between">
         <div className="italic text-3xl font-extrabold">
-          <img src="/reverb-new.png" alt="Logo" className="w-40 h-34" />
+          <Image
+            src="/reverb-new.png"
+            alt="Logo"
+            width={160} // equals Tailwind's w-40
+            height={136} // closest to your intention of h-34
+            className="w-40 h-[136px]"
+          />
         </div>
         <div className="flex items-center gap-4">
           <Providers>

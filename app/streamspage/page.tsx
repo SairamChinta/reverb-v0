@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 
 export default function Component() {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const [creatorId, setCreatorId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 

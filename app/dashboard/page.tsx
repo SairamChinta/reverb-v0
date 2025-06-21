@@ -1,12 +1,13 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-// @ts-ignore
+//@@ts-expect-error
 import { Music, Radio, Users, Wand2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Appbar } from "@/app/components/Appbar"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
+import Image from "next/image"
 
 export default function Landingpage() {
   const router = useRouter()
@@ -40,8 +41,8 @@ export default function Landingpage() {
 
           <p className="mx-auto max-w-2xl text-lg text-white/70">
             Build a stream where anyone can toss in YouTube tracks,
-vote up their faves, and shape the playlist live.
-It's like a house party — but the aux is shared.
+            vote up their faves, and shape the playlist live.
+            It&apos;s like a house party — but the aux is shared.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -139,7 +140,13 @@ It's like a house party — but the aux is shared.
       {/* FOOTER */}
       <footer className="border-t border-white/10">
         <div className="container px-32 flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
-         <img src="/reverb-new.png" alt="Logo" className="w-20 h-16" />
+          <Image
+            src="/reverb-new.png"
+            alt="Logo"
+            width={80}
+            height={64}
+            className="w-20 h-16"
+          />
           <span className="text-white/50">&copy; 2025 reverB — All rights reserved.</span>
         </div>
       </footer>
