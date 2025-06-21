@@ -200,7 +200,7 @@ export default function StreamView({
         setPlayNextLoader(false);
       }
     }
-  },[queue]);
+  },[]);//queue
 
   const handleShare = (platform: 'whatsapp' | 'twitter' | 'instagram' | 'clipboard') => {
     const shareableLink = `${window.location.origin}/creator/${creatorId}`///spaces/${spaceId}`

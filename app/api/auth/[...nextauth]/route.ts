@@ -1,5 +1,5 @@
 import { prismaClient } from "@/app/lib/db";
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
 
@@ -33,7 +33,7 @@ import GoogleProvider from "next-auth/providers/google";
 
 //export {handler as GET, handler as POST}
 
-export const authOptions = {
+export const reverbAuthOptions: AuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -42,7 +42,6 @@ export const authOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET ?? "secret",
   callbacks: {
-    //@ts-expect-error- `params` typing is incompatible but safe to ignore here
     async signIn(params) {
       if (!params.user.email) return false;
       try {
@@ -57,5 +56,5 @@ export const authOptions = {
   },
 };
 
-const handler = NextAuth(authOptions);
+const handler = NextAuth(reverbAuthOptions);
 export { handler as GET, handler as POST };

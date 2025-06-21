@@ -6,7 +6,7 @@ import YouTubeSearch from "youtube-search-api";
 import { YT_REGEX } from "@/app/lib/utils";
 import { getServerSession } from "next-auth/next";
 //@@ts-expect-error: This external lib type is incorrect
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { reverbAuthOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const CreateStreamSchema = z.object({
   creatorId: z.string(),
@@ -17,7 +17,7 @@ const MAX_QUEUE_LEN = 20;
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(reverbAuthOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
         { message: "Unauthenticated" },
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(reverbAuthOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
         { message: "Unauthenticated" },
