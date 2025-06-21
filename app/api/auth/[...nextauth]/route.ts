@@ -41,7 +41,7 @@ export const authOptions = {
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET ?? "secret",
-  callbacks: {//@ts-expect-error
+  callbacks: {//@ts-expect-error: This params type is incorrect
     async signIn(params) {
       if (!params.user.email) return false;
       try {

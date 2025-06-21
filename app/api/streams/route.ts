@@ -1,11 +1,11 @@
 import { prismaClient } from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-//@ts-expect-error
+//@ts-expect-error: This external api type is incorrect
 import YouTubeSearch from "youtube-search-api";
 import { YT_REGEX } from "@/app/lib/utils";
 import { getServerSession } from "next-auth/next";
-//@@ts-expect-error
+//@@ts-expect-error: This external lib type is incorrect
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const CreateStreamSchema = z.object({
@@ -214,10 +214,10 @@ export async function GET(req: NextRequest) {
 // import { prismaClient } from "@/app/lib/db";
 // import { NextRequest, NextResponse } from "next/server";
 // import { z } from "zod";
-// // @ts-ignore
+// // @@ts-expect-error
 // import youtubesearchapi from "youtube-search-api";
 // import { YT_REGEX } from "@/app/lib/utils";
-// import { getServerSession } from "next-auth";// @ts-ignore
+// import { getServerSession } from "next-auth";// @@ts-expect-error
 // import { authOptions } from "@/app/api/auth/[...nextauth]";
 
 // const CreateStreamSchema = z.object({
