@@ -57,7 +57,25 @@ export default function StreamView({
   const [isCreator, setIsCreator] = useState(false);
   const [isEmptyQueueDialogOpen, setIsEmptyQueueDialogOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-
+  
+  const playNext = useCallback(async () => {
+    if (queue.length > 0) {
+      try {
+        setPlayNextLoader(true);
+        const data = await fetch(`/api/streams/next`, {//?spaceId=${spaceId}
+          method: "GET",
+        });
+        const json = await data.json();
+        setCurrentVideo(json.stream);
+        setQueue((q) => q.filter((x) => x.id !== json.stream?.id));
+      } catch (e) {
+        console.error("Error playing next song:", e);
+      } finally {
+        setPlayNextLoader(false);
+      }
+    }
+  },[queue]);
+  
   const refreshStreams = useCallback(async () => {
     try {
       const res = await fetch(`/api/streams/?creatorId=${creatorId}`, {//spaceId=${spaceId}
@@ -114,7 +132,7 @@ export default function StreamView({
     return () => {
       player.destroy();
     };
-  }, [currentVideo, videoPlayerRef]);
+  }, [currentVideo, videoPlayerRef, playNext]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,23 +202,7 @@ export default function StreamView({
     });
   };
 
-  const playNext = useCallback(async () => {
-    if (queue.length > 0) {
-      try {
-        setPlayNextLoader(true);
-        const data = await fetch(`/api/streams/next`, {//?spaceId=${spaceId}
-          method: "GET",
-        });
-        const json = await data.json();
-        setCurrentVideo(json.stream);
-        setQueue((q) => q.filter((x) => x.id !== json.stream?.id));
-      } catch (e) {
-        console.error("Error playing next song:", e);
-      } finally {
-        setPlayNextLoader(false);
-      }
-    }
-  },[queue]);
+  
 
   const handleShare = (platform: 'whatsapp' | 'twitter' | 'instagram' | 'clipboard') => {
     const shareableLink = `${window.location.origin}/creator/${creatorId}`///spaces/${spaceId}`
