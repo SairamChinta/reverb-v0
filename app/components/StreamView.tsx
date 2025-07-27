@@ -699,7 +699,7 @@ export default function StreamView({
   useEffect(() => {
     if (!videoPlayerRef.current || !currentVideo || !playVideo) return;
 
-    let player: any;
+    let player: ReturnType<typeof YouTubePlayer> | undefined;
     let isDestroyed = false;
     let videoEndHandled = false;
 
@@ -721,7 +721,9 @@ export default function StreamView({
             
             // Stop the video immediately
             try {
+              if (player) {
               await player.stopVideo();
+              }
             } catch (error) {
               console.error("Error stopping video:", error);
             }
@@ -754,7 +756,7 @@ export default function StreamView({
         }
       }
     };
-  }, [currentVideo?.extractedId]); // Only depend on the video ID
+  }, [currentVideo?.extractedId, isPlayingNext, playNext, playVideo]); // Only depend on the video ID
 
 
 
