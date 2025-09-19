@@ -14,7 +14,7 @@ export function Appbar() {
     if (session?.user) {
       router.push("/streamspage");
     } else {
-      router.push("/api/auth/signin"); // or replace with custom login page
+      router.push("/api/auth/signin");
     }
   };
 

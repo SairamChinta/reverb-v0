@@ -6,6 +6,14 @@ import StreamView from "../components/StreamView"
 import 'react-toastify/dist/ReactToastify.css'
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 
+const SimpleLoader = () => (
+ <div className="flex items-center justify-center min-h-screen">
+    <div className="relative">
+      <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+    </div>
+  </div>
+)
+
 export default function Component() {
   const { status } = useSession()
   const [creatorId, setCreatorId] = useState<string | null>(null)
@@ -31,7 +39,7 @@ export default function Component() {
     }
   }, [status])
 
-  if (loading || status === "loading") return <div>Loading...</div>
+  if (loading || status === "loading") return <SimpleLoader />
   if (!creatorId) return <div>Error: Unable to load user data</div>
 
   return <StreamView creatorId={creatorId} playVideo={true} />
