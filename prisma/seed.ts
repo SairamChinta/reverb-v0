@@ -80,6 +80,13 @@ function getYoutubeData(title: string, videoId: string) {
 }
 
 async function main() {
+  console.log("Deleting existing data...")
+  // Delete in reverse order of dependency to avoid constraint errors
+  await prisma.upvote.deleteMany({})
+  await prisma.stream.deleteMany({})
+  await prisma.user.deleteMany({})
+  console.log("Existing data deleted.\n")
+  
   console.log("Seeding 100 users...")
   const usersData = []
   const emailSet = new Set<string>()
