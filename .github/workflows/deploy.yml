@@ -1,0 +1,41 @@
+name: CD - Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/reverb-v0
+
+            echo "Pulling latest changes..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "Installing dependencies..."
+            npm ci
+
+            echo "Running Prisma setup..."
+            npx prisma generate
+            npx prisma migrate deploy
+            npx prisma db seed
+
+            echo "Building Next.js app..."
+            npm run build
+
+            echo "Restarting PM2..."
+            pm2 restart reverb || pm2 start npm --name "reverb" -- start
