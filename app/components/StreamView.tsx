@@ -44,8 +44,8 @@ export default function StreamView({
   const [loading, setLoading] = useState(false);
   const [playNextLoader, setPlayNextLoader] = useState(false);
   const videoPlayerRef = useRef<HTMLDivElement>(null);
-  const [_isCreator, setIsCreator] = useState(false); //by using '_' ESLint aware they're unused but keeping them intentionally
-  const [_isEmptyQueueDialogOpen, setIsEmptyQueueDialogOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isCreator, setIsCreator] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isPlayingNext, setIsPlayingNext] = useState(false); // Flag to prevent conflicts
   const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -212,7 +212,7 @@ export default function StreamView({
         }
       }
     };
-  }, [currentVideo?.extractedId, isPlayingNext, playNext, playVideo]);
+  }, [currentVideo?.extractedId, isPlayingNext, playNext, playVideo, currentVideo]);
 
 
 
@@ -340,32 +340,6 @@ export default function StreamView({
           return;
       }
       window.open(url, '_blank');
-    }
-  };
-
-  const emptyQueue = async () => {
-    try {
-      const res = await fetch("/api/streams/empty-queue", {
-        method: "POST",
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({}),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Empty queue error:", errorText);
-        throw new Error(`Failed to empty queue: ${res.status}`);
-      }
-
-      const data = await res.json();
-      toast.success(data.message || "Queue emptied successfully");
-      setQueue([]); // Immediately clear the queue
-      setIsEmptyQueueDialogOpen(false);
-    } catch (error) {
-      console.error("Error emptying queue:", error);
-      toast.error("An error occurred while emptying the queue");
     }
   };
 
