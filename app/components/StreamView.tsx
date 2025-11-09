@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronUp, ChevronDown, Share2, Play, Trash2, X, MessageCircle, Instagram, Twitter } from "lucide-react";
+import { ChevronUp, ChevronDown, Share2, Play, MessageCircle, Twitter } from "lucide-react";
 import { toast } from "sonner";
 import { Appbar } from "./Appbar";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
@@ -12,14 +12,6 @@ import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { YT_REGEX } from "../lib/utils";
 import YouTubePlayer from "youtube-player";
 import Image from "next/image";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
 interface Video {
@@ -52,8 +44,8 @@ export default function StreamView({
   const [loading, setLoading] = useState(false);
   const [playNextLoader, setPlayNextLoader] = useState(false);
   const videoPlayerRef = useRef<HTMLDivElement>(null);
-  const [isCreator, setIsCreator] = useState(false);
-  const [isEmptyQueueDialogOpen, setIsEmptyQueueDialogOpen] = useState(false);
+  const [_isCreator, setIsCreator] = useState(false); //by using '_' ESLint aware they're unused but keeping them intentionally
+  const [_isEmptyQueueDialogOpen, setIsEmptyQueueDialogOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isPlayingNext, setIsPlayingNext] = useState(false); // Flag to prevent conflicts
   const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
