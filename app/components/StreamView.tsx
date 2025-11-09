@@ -98,7 +98,7 @@ export default function StreamView({
     if (isPlayingNext) return;
     
     try {
-      const res = await fetch(`/api/streams?creatorId=${creatorId}`, { // Remove trailing slash and fix query param
+      const res = await fetch(`/api/streams?creatorId=${creatorId}`, {
         credentials: "include",
       });
 
@@ -135,7 +135,6 @@ export default function StreamView({
 
     } catch (error) {
       console.error("Error refreshing streams:", error);
-      // Don't clear the queue on error, just log it
     }
   }, [creatorId, isPlayingNext]);
 
@@ -148,7 +147,7 @@ export default function StreamView({
       }
       refreshTimeoutRef.current = setTimeout(() => {
         refreshStreams();
-        startRefreshInterval(); // Restart the timeout
+        startRefreshInterval();
       }, REFRESH_INTERVAL_MS);
     };
     
@@ -221,7 +220,7 @@ export default function StreamView({
         }
       }
     };
-  }, [currentVideo?.extractedId, isPlayingNext, playNext, playVideo]); // Only depend on the video ID
+  }, [currentVideo?.extractedId, isPlayingNext, playNext, playVideo]);
 
 
 
@@ -244,7 +243,7 @@ export default function StreamView({
 
       console.log("Sending request:", requestBody);
 
-      const res = await fetch("/api/streams", { // Remove trailing slash
+      const res = await fetch("/api/streams", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -282,7 +281,7 @@ export default function StreamView({
   };
 
   const handleVote = async (id: string, isUpvote: boolean) => {
-    // Optimistic update
+
     setQueue((prevQueue) =>
       prevQueue
         .map((video) =>
@@ -316,7 +315,7 @@ export default function StreamView({
       }
     } catch (error) {
       console.error("Error voting:", error);
-      // Revert optimistic update on error
+
       refreshStreams();
       toast.error("Failed to vote. Please try again.");
     }
@@ -378,23 +377,6 @@ export default function StreamView({
     }
   };
 
-  const removeSong = async (streamId: string) => {
-    try {
-      const res = await fetch(`/api/streams/remove?streamId=${streamId}&creatorId=${creatorId}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        toast.success("Song removed successfully");
-        // Optimistically remove from queue
-        setQueue((prevQueue) => prevQueue.filter((video) => video.id !== streamId));
-      } else {
-        toast.error("Failed to remove song");
-      }
-    } catch {
-      toast.error("An error occurred while removing the song");
-    }
-  };
-
   return (
     <div className="pt-20 flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-black text-gray-200">
       <Appbar />
@@ -435,13 +417,6 @@ export default function StreamView({
                       </div>
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem onClick={() => handleShare('instagram')}>
-                      <div className="flex items-center space-x-2">
-                        <Instagram className="h-6 w-6 text-pink-500" />
-                        <span>Instagram</span>
-                      </div>
-                    </DropdownMenuItem>
-
                     <DropdownMenuSeparator />
 
                     <DropdownMenuItem onClick={() => handleShare('clipboard')}>
@@ -451,14 +426,7 @@ export default function StreamView({
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                {isCreator && (
-                  <Button
-                    onClick={() => setIsEmptyQueueDialogOpen(true)}
-                    className="bg-gray-700 hover:bg-gray-600 text-white transition-colors"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" /> Empty Queue
-                  </Button>
-                )}
+                
               </div>
             </div>
             {queue.length === 0 ? (
@@ -511,16 +479,7 @@ export default function StreamView({
                               )}
                               <span>{video.upvotes}</span>
                             </Button>
-                            {isCreator && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => removeSong(video.id)}
-                                className="bg-gray-700 hover:bg-gray-600 text-white transition-colors"
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            )}
+                            
                           </div>
                         </div>
                       </div>
@@ -607,34 +566,6 @@ export default function StreamView({
           </div>
         </div>
       </div>
-      <Dialog
-        open={isEmptyQueueDialogOpen}
-        onOpenChange={setIsEmptyQueueDialogOpen}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Empty Queue</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to empty the queue? This will remove all
-              songs from the queue. This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsEmptyQueueDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={emptyQueue}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              Empty Queue
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

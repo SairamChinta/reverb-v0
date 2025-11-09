@@ -25,8 +25,8 @@ export function Appbar() {
           <Image
             src="/reverb-new.png"
             alt="Logo"
-            width={160} // equals Tailwind's w-40
-            height={136} // closest to your intention of h-34
+            width={160}
+            height={136}
             className="w-40 h-[136px]"
           />
         </div>

@@ -1,7 +1,7 @@
 'use client'; 
 
 import { useState, useEffect } from 'react';
-import { signIn, signOut, useSession } from 'next-auth/react'; // Or your authentication library
+import { signIn, signOut, useSession } from 'next-auth/react';
 
 export function AuthButtons() {
     const { data: session } = useSession();
@@ -12,7 +12,7 @@ export function AuthButtons() {
     }, []);
 
     if (!mounted) {
-        return null; // Or a loading indicator if you prefer
+        return null;
     }
 
     return (

@@ -22,10 +22,8 @@ export default function Landingpage() {
     <div className="min-h-screen font-vibe bg-slate-900 text-white">
       <Appbar />
 
-      {/* HERO */}
       <section className="container pt-32 pb-20">
         <div className="relative mx-auto max-w-4xl text-center space-y-10">
-          {/* neon glow backdrop */}
           <div className="absolute inset-0 -z-10 blur-3xl opacity-30 bg-[radial-gradient(circle_at_center,_rgba(128,90,213,0.4),transparent_60%)]" />
 
           <span className="inline-flex items-center gap-2 rounded-full bg-slate-800/60 px-4 py-1 text-sm shadow ring-1 ring-white/10">
@@ -65,7 +63,6 @@ export default function Landingpage() {
         </div>
       </section>
 
-      {/* FEATURES */}
       <section className="container py-18 px-28">
         <div className="grid gap-10 lg:grid-cols-3">
           {[
@@ -89,7 +86,6 @@ export default function Landingpage() {
               key={i}
               className="group relative overflow-hidden rounded-xl bg-slate-800/60 p-10 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-600/30"
             >
-              {/* subtle glow */}
               <div className="absolute inset-0 -z-10 opacity-0 group-hover:opacity-100 transition bg-[radial-gradient(circle_at_top_left,_rgba(128,90,213,0.15),transparent_70%)]" />
               <div className="space-y-5">
                 <div className="inline-flex items-center justify-center h-14 w-14 rounded-lg bg-purple-600/10 text-purple-600">
@@ -103,7 +99,6 @@ export default function Landingpage() {
         </div>
       </section>
 
-      {/* WAITLIST */}
       <section className="container py-28 relative">
         <div className="absolute inset-0 -z-10 blur-3xl opacity-30 bg-[radial-gradient(circle_at_center,_rgba(128,90,213,0.25),transparent_70%)]" />
 
@@ -137,7 +132,6 @@ export default function Landingpage() {
         </div>
       </section>
 
-      {/* FOOTER */}
       <footer className="border-t border-white/10">
         <div className="container px-32 flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
           <Image

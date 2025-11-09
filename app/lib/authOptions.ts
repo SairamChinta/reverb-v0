@@ -1,4 +1,3 @@
-// app/lib/authOptions.ts
 import GoogleProvider from "next-auth/providers/google";
 import { prismaClient } from "@/app/lib/db";
 

@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 
 export async function GET (){
     const session = await getServerSession();
-    // you can get rid of db call here
     
     const user = await prismaClient.user.findFirst({
         where:{
