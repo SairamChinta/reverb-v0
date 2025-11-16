@@ -6,10 +6,6 @@
 3. 🔖 [Features](#-features)
 4. ⚡ [Quick Start](#-quick-start)
 5. 🌏 [Environment Variables](#-environment-variables)
-6. 📜 [Scripts](#-scripts)
-7. 🧠 [Future Enhancements](#-future-enhancements)
-8. 👨‍💻 [Author](#-author)
-9. 🪩 [License](#-license)
 
 ---
 
@@ -47,8 +43,9 @@ Backend:
 
 Database:
   - PostgreSQL (via Prisma)
+---
 
-🔖 Features
+## 🔖 Features
 
 🔐 Google Authentication
   → Secure login using Google OAuth via NextAuth.
@@ -78,9 +75,9 @@ Database:
 
 🌈 Responsive UI
   → Built with TailwindCSS + ShadCN for a smooth, modern experience.
-
-⚡ Quick Start
-🧰 Prerequisites
+---
+## ⚡ Quick Start
+## 🧰 Prerequisites
 
 Ensure you have installed:
 
@@ -91,7 +88,7 @@ npm ≥ 9
 PostgreSQL database (local or hosted)
 ```bash
 1️⃣ Clone the Repository
-git clone https://github.com/SairamChinta/reverb.git
+git clone https://github.com/SairamChinta/reverb-v0.git
 cd reverb
 
 2️⃣ Install Dependencies
@@ -108,8 +105,8 @@ npx prisma studio
 npm run dev
 ```
 Visit your app at 👉 http://localhost:3001
-
-🌏 Environment Variables
+---
+## 🌏 Environment Variables
 
 Create a .env file at the root of your project:
 ```bash
