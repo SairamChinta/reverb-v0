@@ -29,7 +29,6 @@ Built for modern developers who want to experience the blend of **Next.js, Prism
 
 ## ⚙️ Tech Stack
 
-```yaml
 Frontend:
   - Next.js 14 (App Router)
   - TypeScript
