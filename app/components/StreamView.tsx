@@ -26,7 +26,6 @@ interface Video {
   userId: string;
   upvotes: number;
   haveUpvoted: boolean;
-  spaceId: string
 }
 
 const REFRESH_INTERVAL_MS = 10 * 1000;
