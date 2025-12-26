@@ -1,8 +1,7 @@
 import { prismaClient } from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-//@ts-expect-error: This external api type is incorrect
-import YouTubeSearch from "youtube-search-api";
+import { google } from "googleapis";
 import { YT_REGEX } from "@/app/lib/utils";
 import { getServerSession } from "next-auth/next";
 //@@ts-expect-error
@@ -64,22 +63,27 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      const res = await YouTubeSearch.GetVideoDetails(extractedId);
+      const youtube = google.youtube({
+        version: 'v3',
+        auth: process.env.YOUTUBE_API_KEY,
+      });
+      const res = await youtube.videos.list({
+        part: ['snippet'],
+        id: [extractedId],
+      });
 
-      if (!res || !res.thumbnail || !res.thumbnail.thumbnails) {
-        console.error("YouTube API Error: Invalid response", res);
+      if (!res.data.items || res.data.items.length === 0) {
+        console.error("YouTube API Error: No video found", res.data);
         return NextResponse.json(
-          { message: "Error fetching video details from YouTube (invalid response)" },
+          { message: "Error fetching video details from YouTube (no video found)" },
           { status: 500 }
         );
       }
 
-      const thumbnails = Array.isArray(res.thumbnail.thumbnails)
-        ? res.thumbnail.thumbnails
-        : [res.thumbnail.thumbnails];
-      thumbnails.sort((a: { width: number }, b: { width: number }) =>
-        a?.width < b?.width ? -1 : 1
-      );
+      const video = res.data.items[0];
+      const snippet = video.snippet!;
+
+      const thumbnails = Object.values(snippet.thumbnails!).sort((a: {width: number}, b: {width: number}) => a.width - b.width);
 
       const existingActiveStream = await prismaClient.stream.count({
         where: {
@@ -101,7 +105,7 @@ export async function POST(req: NextRequest) {
           url: data.url,
           extractedId,
           type: "Youtube",
-          title: res.title ?? "Can't find Video Title",
+          title: snippet.title ?? "Can't find Video Title",
           smallImg:
             (thumbnails.length > 1
               ? thumbnails[thumbnails.length - 2].url
