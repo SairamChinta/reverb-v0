@@ -24,9 +24,20 @@ jobs:
 
       - name: Generate Prisma Client
         run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SHADOW_DATABASE_URL: ${{ secrets.SHADOW_DATABASE_URL }}
 
       - name: Build Next.js
         run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SHADOW_DATABASE_URL: ${{ secrets.SHADOW_DATABASE_URL }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
 
       - name: Create deployment package
         run: |
@@ -55,17 +66,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/reverb-v0
-            
-            # Extract new build
             tar -xzf ~/deploy.tar.gz -C ~/reverb-v0
             rm ~/deploy.tar.gz
-            
-            # Install production dependencies only (fast)
             npm ci --omit=dev
-            
-            # Run Prisma migrations
             npx prisma migrate deploy
-            
-            # Restart PM2
             pm2 restart reverb || pm2 start npm --name "reverb" -- start
             pm2 save
