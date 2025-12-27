@@ -105,7 +105,7 @@ npx prisma studio
 npm run dev
 ```
 Visit your app at 👉 http://localhost:3001
-
+---
 ## 🌏 Environment Variables
 
 Create a .env file at the root of your project:
