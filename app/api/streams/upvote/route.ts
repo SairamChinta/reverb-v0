@@ -2,7 +2,6 @@ import { prismaClient } from "@/app/lib/db";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-// @ts-expect-error - authOptions typing mismatch
 import { reverbAuthOptions } from "@/app/lib/authOptions";
 import { emitVoteUpdate } from "@/app/lib/socket";
 
