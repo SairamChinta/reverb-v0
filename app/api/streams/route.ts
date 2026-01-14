@@ -4,8 +4,8 @@ import { z } from "zod";
 import { google } from "googleapis";
 import { YT_REGEX } from "@/app/lib/utils";
 import { getServerSession } from "next-auth/next";
-//@@ts-expect-error
 import { reverbAuthOptions } from "@/app/lib/authOptions";
+import { emitSongAdded } from "@/app/lib/socket";
 
 const CreateStreamSchema = z.object({
   creatorId: z.string(),
@@ -83,11 +83,28 @@ export async function POST(req: NextRequest) {
       const video = res.data.items[0];
       const snippet = video.snippet!;
 
-      const thumbnails = Object.values(snippet.thumbnails!).sort((a: {width: number}, b: {width: number}) => a.width - b.width);
+      const thumbnails = Object.values(snippet.thumbnails!).sort((a: { width: number }, b: { width: number }) => a.width - b.width);
+
+      // Check for duplicate songs in queue
+      const existingSong = await prismaClient.stream.findFirst({
+        where: {
+          userId: data.creatorId,
+          extractedId: extractedId,
+          played: false,
+        },
+      });
+
+      if (existingSong) {
+        return NextResponse.json(
+          { message: "This song is already in your queue" },
+          { status: 409 }
+        );
+      }
 
       const existingActiveStream = await prismaClient.stream.count({
         where: {
           userId: data.creatorId,
+          played: false,
         },
       });
 
@@ -116,6 +133,18 @@ export async function POST(req: NextRequest) {
             "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfW0rOyWkv0OqfwFuljuVldoXEj5VitoWK5w&s",
         },
       });
+
+      // Emit socket event for real-time update
+      try {
+        emitSongAdded(data.creatorId, {
+          ...stream,
+          haveUpvoted: false,
+          upvotes: 0,
+        });
+      } catch (socketError) {
+        console.error("Socket emission error:", socketError);
+        // Don't fail the request if socket emission fails
+      }
 
       return NextResponse.json({
         ...stream,

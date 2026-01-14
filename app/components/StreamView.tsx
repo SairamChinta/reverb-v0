@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronUp, ChevronDown, Share2, Play, MessageCircle, Twitter } from "lucide-react";
+import { ChevronUp, ChevronDown, Share2, Play, MessageCircle, Twitter, Wifi, WifiOff } from "lucide-react";
 import { toast } from "sonner";
 import { Appbar } from "./Appbar";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
@@ -13,6 +13,7 @@ import { YT_REGEX } from "../lib/utils";
 import YouTubePlayer from "youtube-player";
 import Image from "next/image";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { useSocket } from "../lib/hooks/useSocket";
 
 interface Video {
   id: string;
@@ -26,9 +27,21 @@ interface Video {
   userId: string;
   upvotes: number;
   haveUpvoted: boolean;
+  createAt: string; // ISO 8601 date string from Prisma
 }
 
-const REFRESH_INTERVAL_MS = 10 * 1000;
+
+
+// Stable sort: Sort by upvotes (desc), then by creation time (asc)
+const stableSort = (videos: Video[]) => {
+  return videos.sort((a, b) => {
+    if (b.upvotes !== a.upvotes) {
+      return b.upvotes - a.upvotes;
+    }
+    // If upvotes are equal, older songs come first
+    return new Date(a.createAt).getTime() - new Date(b.createAt).getTime();
+  });
+};
 
 export default function StreamView({
   creatorId,
@@ -43,33 +56,33 @@ export default function StreamView({
   const [loading, setLoading] = useState(false);
   const [playNextLoader, setPlayNextLoader] = useState(false);
   const videoPlayerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isCreator, setIsCreator] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [isPlayingNext, setIsPlayingNext] = useState(false); // Flag to prevent conflicts
-  const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isPlayingNext, setIsPlayingNext] = useState(false);
+  const toastShownForSong = useRef<Set<string>>(new Set());
+  const lastSubmittedSongId = useRef<string | null>(null);
 
   const playNext = useCallback(async () => {
     if (isPlayingNext) return; // Prevent multiple simultaneous calls
-    
+
     try {
       setIsPlayingNext(true);
       setPlayNextLoader(true);
-      
+
       const data = await fetch(`/api/streams/next`, {
         method: "GET",
       });
       const json = await data.json();
-      
+
       if (json.stream) {
         // Remove the current song from queue first
         setQueue((prevQueue) => {
           const currentVideoId = currentVideo?.id;
-          return currentVideoId ? 
-            prevQueue.filter((x) => x.id !== currentVideoId) : 
+          return currentVideoId ?
+            prevQueue.filter((x) => x.id !== currentVideoId) :
             prevQueue;
         });
-        
+
         // Set the new current video
         setCurrentVideo(json.stream);
       } else {
@@ -87,7 +100,7 @@ export default function StreamView({
   const refreshStreams = useCallback(async () => {
     // Don't refresh if we're in the middle of playing next song
     if (isPlayingNext) return;
-    
+
     try {
       const res = await fetch(`/api/streams?creatorId=${creatorId}`, {
         credentials: "include",
@@ -99,11 +112,11 @@ export default function StreamView({
       }
 
       const json = await res.json();
-      
+
       if (json.streams && Array.isArray(json.streams)) {
         setQueue(
           json.streams.length > 0
-            ? json.streams.sort((a: Video, b: Video) => b.upvotes - a.upvotes)
+            ? stableSort(json.streams)
             : [],
         );
       } else {
@@ -129,27 +142,64 @@ export default function StreamView({
     }
   }, [creatorId, isPlayingNext]);
 
+  // Initial load - fetch current state once
   useEffect(() => {
     refreshStreams();
-    
-    const startRefreshInterval = () => {
-      if (refreshTimeoutRef.current) {
-        clearTimeout(refreshTimeoutRef.current);
-      }
-      refreshTimeoutRef.current = setTimeout(() => {
-        refreshStreams();
-        startRefreshInterval();
-      }, REFRESH_INTERVAL_MS);
-    };
-    
-    startRefreshInterval();
-
-    return () => {
-      if (refreshTimeoutRef.current) {
-        clearTimeout(refreshTimeoutRef.current);
-      }
-    };
   }, [refreshStreams]);
+
+  // WebSocket for real-time updates - replaces polling!
+  const { isConnected, reconnectAttempts } = useSocket({
+    creatorId,
+    onSongAdded: useCallback((data: any) => {
+      console.log("🎵 Song added via WebSocket:", data.song);
+
+      setQueue((prevQueue) => {
+        const exists = prevQueue.some(v => v.id === data.song.id);
+        if (exists) {
+          console.log("⚠️ Song already exists, skipping");
+          return prevQueue;
+        }
+
+        // Don't show toast if this is our own song
+        const isOwnSong = lastSubmittedSongId.current === data.song.id;
+        if (!isOwnSong && !toastShownForSong.current.has(data.song.id)) {
+          toastShownForSong.current.add(data.song.id);
+          toast.success("New song added to queue!");
+        }
+
+        if (isOwnSong) {
+          lastSubmittedSongId.current = null;
+        }
+
+        return stableSort([...prevQueue, data.song]);
+      });
+    }, []),
+    onVoteUpdate: useCallback((data: any) => {
+      console.log("📊 Vote update via WebSocket:", data);
+      setQueue((prevQueue) =>
+        stableSort(
+          prevQueue.map((video) =>
+            video.id === data.streamId
+              ? { ...video, upvotes: data.newCount }
+              : video
+          )
+        )
+      );
+    }, []),
+    onSongChange: useCallback((data: any) => {
+      console.log("🎶 Song changed via WebSocket:", data.currentSong);
+      if (data.currentSong) {
+        setCurrentVideo(data.currentSong);
+        // Remove from queue
+        setQueue((prevQueue) =>
+          prevQueue.filter((x) => x.id !== data.currentSong.id)
+        );
+        toast.info(`Now playing: ${data.currentSong.title}`);
+      } else {
+        setCurrentVideo(null);
+      }
+    }, []),
+  });
 
   useEffect(() => {
     if (!videoPlayerRef.current || !currentVideo || !playVideo) return;
@@ -161,28 +211,28 @@ export default function StreamView({
     const initializePlayer = async () => {
       try {
         console.log("Initializing player for:", currentVideo.title);
-        
+
         player = YouTubePlayer(videoPlayerRef.current!);
         await player.loadVideoById(currentVideo.extractedId);
         await player.playVideo();
 
         const eventHandler = async (event: { data: number }) => {
           if (isDestroyed) return;
-          
+
           // YouTube Player States: 0 = ended, 1 = playing, 2 = paused
           if (event.data === 0 && !videoEndHandled) {
             videoEndHandled = true;
             console.log("Video ended, playing next...");
-            
+
             // Stop the video immediately
             try {
               if (player) {
-              await player.stopVideo();
+                await player.stopVideo();
               }
             } catch (error) {
               console.error("Error stopping video:", error);
             }
-            
+
             // Call playNext after a short delay
             setTimeout(() => {
               if (!isDestroyed && !isPlayingNext) {
@@ -193,7 +243,7 @@ export default function StreamView({
         };
 
         player.on("stateChange", eventHandler);
-        
+
       } catch (error) {
         console.error("Error initializing YouTube player:", error);
       }
@@ -243,7 +293,7 @@ export default function StreamView({
       });
 
       console.log("Response status:", res.status);
-      
+
       if (!res.ok) {
         const errorText = await res.text();
         console.error("Error response:", errorText);
@@ -252,19 +302,28 @@ export default function StreamView({
 
       const data = await res.json();
       console.log("Success response:", data);
-      
-      // Add new song to queue and sort by upvotes
-      setQueue((prevQueue) => 
-        [...prevQueue, data].sort((a: Video, b: Video) => b.upvotes - a.upvotes)
-      );
+
+      // Track our submission to filter WebSocket event
+      lastSubmittedSongId.current = data.id;
+
       setInputLink("");
-      toast.success("Song added to queue successfully");
     } catch (error) {
       console.error("Error in handleSubmit:", error);
       if (error instanceof Error) {
-        toast.error(error.message);
+        const errorMessage = error.message.toLowerCase();
+        if (errorMessage.includes('409') || errorMessage.includes('already in your queue')) {
+          toast.error("This song is already in your queue");
+        } else if (errorMessage.includes('411') || errorMessage.includes('invalid')) {
+          toast.error("Invalid YouTube URL. Please check and try again.");
+        } else if (errorMessage.includes('500') || errorMessage.includes('youtube api')) {
+          toast.error("YouTube API error. Video may be unavailable or deleted.");
+        } else if (errorMessage.includes('limit')) {
+          toast.error(`Queue is full! Maximum ${20} songs allowed.`);
+        } else {
+          toast.error(error.message);
+        }
       } else {
-        toast.error("An unexpected error occurred");
+        toast.error("An unexpected error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -272,21 +331,7 @@ export default function StreamView({
   };
 
   const handleVote = async (id: string, isUpvote: boolean) => {
-
-    setQueue((prevQueue) =>
-      prevQueue
-        .map((video) =>
-          video.id === id
-            ? {
-                ...video,
-                upvotes: isUpvote ? video.upvotes + 1 : video.upvotes - 1,
-                haveUpvoted: !video.haveUpvoted,
-              }
-            : video,
-        )
-        .sort((a, b) => b.upvotes - a.upvotes),
-    );
-
+    // Don't update locally - WebSocket will handle it!
     try {
       const requestBody = {
         streamId: id,
@@ -306,8 +351,6 @@ export default function StreamView({
       }
     } catch (error) {
       console.error("Error voting:", error);
-
-      refreshStreams();
       toast.error("Failed to vote. Please try again.");
     }
   };
@@ -391,7 +434,7 @@ export default function StreamView({
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                
+
               </div>
             </div>
             {queue.length === 0 ? (
@@ -421,31 +464,26 @@ export default function StreamView({
                         <h3 className="font-semibold text-white text-lg mb-2">
                           {video.title}
                         </h3>
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-white">
-                            {video.title}
-                          </span>
-                          <div className="flex items-center space-x-2 mt-3">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                handleVote(
-                                  video.id,
-                                  video.haveUpvoted ? false : true,
-                                )
-                              }
-                              className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
-                            >
-                              {video.haveUpvoted ? (
-                                <ChevronDown className="h-4 w-4" />
-                              ) : (
-                                <ChevronUp className="h-4 w-4" />
-                              )}
-                              <span>{video.upvotes}</span>
-                            </Button>
-                            
-                          </div>
+                        <div className="flex items-center space-x-2 mt-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleVote(
+                                video.id,
+                                video.haveUpvoted ? false : true,
+                              )
+                            }
+                            className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+                          >
+                            {video.haveUpvoted ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronUp className="h-4 w-4" />
+                            )}
+                            <span>{video.upvotes}</span>
+                          </Button>
+
                         </div>
                       </div>
                     </CardContent>

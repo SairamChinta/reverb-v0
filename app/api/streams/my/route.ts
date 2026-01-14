@@ -1,45 +1,46 @@
 import { prismaClient } from "@/app/lib/db";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import { reverbAuthOptions } from "@/app/lib/authOptions";
 
-export async function GET (){
-    const session = await getServerSession();
+export async function GET() {
+    const session = await getServerSession(reverbAuthOptions);
 
     const user = await prismaClient.user.findFirst({
-        where:{
+        where: {
             email: session?.user?.email ?? ""
         }
     });
- 
-    if(!user){
+
+    if (!user) {
         return NextResponse.json({
-             message:"Unauthenticated"
-             },{
-             status: 403
-         })
+            message: "Unauthenticated"
+        }, {
+            status: 403
+        })
     }
     const streams = await prismaClient.stream.findMany({
         where: {
-            userId:user.id
-        },include:{
-            _count:{
-                select:{
-                    upvotes:true
+            userId: user.id
+        }, include: {
+            _count: {
+                select: {
+                    upvotes: true
                 }
             },
             upvotes: {
-                where:{
+                where: {
                     userId: user.id
                 }
             }
         }
     });
-    return NextResponse.json({  
-            streams: streams.map(({_count, ...rest}) => ({
-                ...rest,
-                upvotes: _count.upvotes,
-                haveUpvoted: rest.upvotes.length ?true : false  
-            }))
+    return NextResponse.json({
+        streams: streams.map(({ _count, ...rest }) => ({
+            ...rest,
+            upvotes: _count.upvotes,
+            haveUpvoted: rest.upvotes.length ? true : false
+        }))
     });
 
 }
