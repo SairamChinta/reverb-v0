@@ -1,7 +1,6 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-// @@ts-expect-error
 import { Music, Radio, Users, Wand2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Appbar } from "@/app/components/Appbar"

@@ -10,12 +10,11 @@ export const reverbAuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET ?? "secret",
   callbacks: {
-    // @ts-expect-error - params type mismatch is safe
-    async signIn(params) {
-      if (!params.user.email) return false;
+    async signIn({ user }: any) {
+      if (!user.email) return false;
       try {
         await prismaClient.user.create({
-          data: { email: params.user.email, provider: "Google" },
+          data: { email: user.email, provider: "Google" },
         });
       } catch {
         // ignore duplicates

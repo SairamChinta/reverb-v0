@@ -151,12 +151,10 @@ export default function StreamView({
   const { isConnected, reconnectAttempts } = useSocket({
     creatorId,
     onSongAdded: useCallback((data: any) => {
-      console.log("🎵 Song added via WebSocket:", data.song);
 
       setQueue((prevQueue) => {
         const exists = prevQueue.some(v => v.id === data.song.id);
         if (exists) {
-          console.log("⚠️ Song already exists, skipping");
           return prevQueue;
         }
 
@@ -175,7 +173,6 @@ export default function StreamView({
       });
     }, []),
     onVoteUpdate: useCallback((data: any) => {
-      console.log("📊 Vote update via WebSocket:", data);
       setQueue((prevQueue) =>
         stableSort(
           prevQueue.map((video) =>
@@ -187,7 +184,6 @@ export default function StreamView({
       );
     }, []),
     onSongChange: useCallback((data: any) => {
-      console.log("🎶 Song changed via WebSocket:", data.currentSong);
       if (data.currentSong) {
         setCurrentVideo(data.currentSong);
         // Remove from queue
@@ -210,8 +206,6 @@ export default function StreamView({
 
     const initializePlayer = async () => {
       try {
-        console.log("Initializing player for:", currentVideo.title);
-
         player = YouTubePlayer(videoPlayerRef.current!);
         await player.loadVideoById(currentVideo.extractedId);
         await player.playVideo();
@@ -282,8 +276,6 @@ export default function StreamView({
         url: inputLink,
       };
 
-      console.log("Sending request:", requestBody);
-
       const res = await fetch("/api/streams", {
         method: "POST",
         headers: {
@@ -292,17 +284,12 @@ export default function StreamView({
         body: JSON.stringify(requestBody),
       });
 
-      console.log("Response status:", res.status);
-
       if (!res.ok) {
         const errorText = await res.text();
-        console.error("Error response:", errorText);
         throw new Error(`Server error: ${res.status} - ${errorText}`);
       }
 
       const data = await res.json();
-      console.log("Success response:", data);
-
       // Track our submission to filter WebSocket event
       lastSubmittedSongId.current = data.id;
 

@@ -12,7 +12,9 @@ export const getIOInstance = (): SocketIOServer | null => {
 export const emitQueueUpdate = (creatorId: string, queue: any[]) => {
     const io = getIOInstance();
     if (!io) {
-        console.warn("Socket.io not initialized yet, skipping queue-update");
+        if (process.env.NODE_ENV === 'development') {
+            console.warn("Socket.io not initialized yet, skipping queue-update");
+        }
         return;
     }
 
@@ -20,13 +22,14 @@ export const emitQueueUpdate = (creatorId: string, queue: any[]) => {
         queue,
         timestamp: new Date().toISOString(),
     });
-    console.log(`Emitted queue-update to stream:${creatorId}`);
 };
 
 export const emitVoteUpdate = (creatorId: string, streamId: string, delta: number, newCount: number) => {
     const io = getIOInstance();
     if (!io) {
-        console.warn("Socket.io not initialized yet, skipping vote-update");
+        if (process.env.NODE_ENV === 'development') {
+            console.warn("Socket.io not initialized yet, skipping queue-update");
+        }
         return;
     }
 
@@ -36,13 +39,14 @@ export const emitVoteUpdate = (creatorId: string, streamId: string, delta: numbe
         newCount,
         timestamp: new Date().toISOString(),
     });
-    console.log(`Emitted vote-update to stream:${creatorId}: ${delta > 0 ? '+' : ''}${delta}`);
 };
 
 export const emitSongChange = (creatorId: string, currentSong: any) => {
     const io = getIOInstance();
     if (!io) {
-        console.warn("Socket.io not initialized yet, skipping song-change");
+        if (process.env.NODE_ENV === 'development') {
+            console.warn("Socket.io not initialized yet, skipping queue-update");
+        }
         return;
     }
 
@@ -50,13 +54,14 @@ export const emitSongChange = (creatorId: string, currentSong: any) => {
         currentSong,
         timestamp: new Date().toISOString(),
     });
-    console.log(`Emitted song-change to stream:${creatorId}`);
 };
 
 export const emitSongAdded = (creatorId: string, song: any) => {
     const io = getIOInstance();
     if (!io) {
-        console.warn("Socket.io not initialized yet, skipping song-added");
+        if (process.env.NODE_ENV === 'development') {
+            console.warn("Socket.io not initialized yet, skipping queue-update");
+        }
         return;
     }
 
@@ -64,5 +69,4 @@ export const emitSongAdded = (creatorId: string, song: any) => {
         song,
         timestamp: new Date().toISOString(),
     });
-    console.log(`Emitted song-added to stream:${creatorId}`);
 };

@@ -22,11 +22,8 @@ export const useSocket = ({
 
     const connect = useCallback(() => {
         if (socketRef.current?.connected) {
-            console.log("Socket already connected");
             return;
         }
-
-        console.log("Connecting to Socket.io...");
 
         const socket = io(window.location.origin, {
             path: "/api/socket",
@@ -45,16 +42,13 @@ export const useSocket = ({
             setReconnectAttempts(0);
 
             // Join the stream room
-            console.log(`Joining stream:${creatorId}`);
             socket.emit("join-stream", creatorId);
         });
 
         socket.on("connected", (data) => {
-            console.log("Connected to stream:", data);
         });
 
         socket.on("disconnect", (reason) => {
-            console.log("Socket disconnected:", reason);
             setIsConnected(false);
         });
 
@@ -87,11 +81,8 @@ export const useSocket = ({
         // First, trigger socket initialization by hitting the endpoint
         const initSocket = async () => {
             try {
-                console.log("Triggering Socket.io initialization...");
                 const response = await fetch("/api/socket");
                 const data = await response.json();
-                console.log("Socket.io init response:", data);
-
                 // Small delay to ensure server is ready
                 setTimeout(() => {
                     connect();
@@ -107,7 +98,6 @@ export const useSocket = ({
 
         return () => {
             if (socketRef.current) {
-                console.log("Cleaning up socket connection");
                 socketRef.current.emit("leave-stream", creatorId);
                 socketRef.current.disconnect();
                 socketRef.current = null;
