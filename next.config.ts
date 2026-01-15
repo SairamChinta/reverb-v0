@@ -23,7 +23,7 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.google.com https://s.ytimg.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.google.com https://s.ytimg.com https://www.youtube.com/iframe_api http://www.youtube.com/iframe_api http://www.youtube.com",
               "frame-src 'self' https://www.youtube.com https://www.google.com",
               "img-src 'self' data: https: blob:",
               "style-src 'self' 'unsafe-inline'",

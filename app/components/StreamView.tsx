@@ -74,28 +74,16 @@ export default function StreamView({
       });
       const json = await data.json();
 
-      if (json.stream) {
-        // Remove the current song from queue first
-        setQueue((prevQueue) => {
-          const currentVideoId = currentVideo?.id;
-          return currentVideoId ?
-            prevQueue.filter((x) => x.id !== currentVideoId) :
-            prevQueue;
-        });
+      // Don't update state here - let WebSocket onSongChange handle it!
+      // This prevents race conditions between local and WebSocket updates
 
-        // Set the new current video
-        setCurrentVideo(json.stream);
-      } else {
-        // No more songs in queue
-        setCurrentVideo(null);
-      }
     } catch (e) {
       console.error("Error playing next song:", e);
     } finally {
       setPlayNextLoader(false);
       setIsPlayingNext(false);
     }
-  }, [isPlayingNext, currentVideo?.id]);
+  }, [isPlayingNext]);
 
   const refreshStreams = useCallback(async () => {
     // Don't refresh if we're in the middle of playing next song
@@ -177,7 +165,11 @@ export default function StreamView({
         stableSort(
           prevQueue.map((video) =>
             video.id === data.streamId
-              ? { ...video, upvotes: data.newCount }
+              ? {
+                ...video,
+                upvotes: data.newCount,
+                // Preserve haveUpvoted state from optimistic update
+              }
               : video
           )
         )
@@ -216,7 +208,6 @@ export default function StreamView({
           // YouTube Player States: 0 = ended, 1 = playing, 2 = paused
           if (event.data === 0 && !videoEndHandled) {
             videoEndHandled = true;
-            console.log("Video ended, playing next...");
 
             // Stop the video immediately
             try {
@@ -224,7 +215,7 @@ export default function StreamView({
                 await player.stopVideo();
               }
             } catch (error) {
-              console.error("Error stopping video:", error);
+              // Silently handle stop error
             }
 
             // Call playNext after a short delay
@@ -318,7 +309,19 @@ export default function StreamView({
   };
 
   const handleVote = async (id: string, isUpvote: boolean) => {
-    // Don't update locally - WebSocket will handle it!
+    // Optimistically update UI immediately for instant feedback
+    setQueue((prevQueue) =>
+      prevQueue.map((video) =>
+        video.id === id
+          ? {
+            ...video,
+            haveUpvoted: isUpvote,
+            upvotes: isUpvote ? video.upvotes + 1 : video.upvotes - 1
+          }
+          : video
+      )
+    );
+
     try {
       const requestBody = {
         streamId: id,
@@ -334,8 +337,31 @@ export default function StreamView({
 
       if (!res.ok) {
         console.error("Vote request failed:", res.status);
+
+        // Revert optimistic update on error
+        setQueue((prevQueue) =>
+          prevQueue.map((video) =>
+            video.id === id
+              ? {
+                ...video,
+                haveUpvoted: !isUpvote,
+                upvotes: isUpvote ? video.upvotes - 1 : video.upvotes + 1
+              }
+              : video
+          )
+        );
+
         throw new Error(`Vote failed: ${res.status}`);
       }
+
+      // Show success toast
+      if (isUpvote) {
+        toast.success("Upvoted!");
+      } else {
+        toast.success("Downvoted!");
+      }
+
+      // WebSocket will sync the final vote count from server
     } catch (error) {
       console.error("Error voting:", error);
       toast.error("Failed to vote. Please try again.");
@@ -373,7 +399,7 @@ export default function StreamView({
   };
 
   return (
-    <div className="pt-20 flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-black text-gray-200">
+    <div className="pt-20 flex flex-col min-h-screen bg-black text-white">
       <Appbar />
       <div className='mx-auto text-2xl bg-gradient-to-r rounded-lg from-indigo-600 to-violet-800 font-bold'>
         { }
@@ -382,14 +408,14 @@ export default function StreamView({
         <div className="grid grid-cols-1 gap-y-5 lg:gap-x-5 lg:grid-cols-5 w-screen py-5 lg:py-8">
           <div className="col-span-3 order-2 lg:order-1">
             <div className="flex flex-col md:flex-row justify-between mb-4">
-              <h2 className="text-2xl font-bold text-white mb-2 md:mb-0">
+              <h2 className="font-primary text-2xl font-bold text-white mb-2 md:mb-0">
                 Upcoming Songs
               </h2>
 
               <div className="flex space-x-2">
                 <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
                   <DropdownMenuTrigger asChild>
-                    <Button onClick={() => setIsOpen(true)} className="bg-purple-700 hover:bg-purple-800 text-white">
+                    <Button onClick={() => setIsOpen(true)} className="bg-white hover:bg-gray-100 text-black font-semibold">
                       <Share2 className="mr-2 h-4 w-4" /> Share
                     </Button>
                   </DropdownMenuTrigger>
@@ -425,7 +451,7 @@ export default function StreamView({
               </div>
             </div>
             {queue.length === 0 ? (
-              <Card className="bg-gray-800 border-gray-700 shadow-lg">
+              <Card className="bg-zinc-900 border-zinc-800 shadow-lg">
                 <CardContent className="p-4 flex flex-col md:flex-row md:space-x-3">
                   <p className="text-center py-8 text-gray-400">
                     No videos in queue
@@ -437,7 +463,7 @@ export default function StreamView({
                 {queue.map((video) => (
                   <Card
                     key={video.id}
-                    className="bg-gray-800 border-gray-700 shadow-lg hover:shadow-xl transition-shadow"
+                    className="bg-zinc-900 border-zinc-800 shadow-lg hover:shadow-xl transition-shadow hover:border-zinc-700"
                   >
                     <CardContent className="p-4 flex flex-col md:flex-row md:space-x-3">
                       <Image
@@ -461,7 +487,7 @@ export default function StreamView({
                                 video.haveUpvoted ? false : true,
                               )
                             }
-                            className="flex items-center space-x-1 bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+                            className="flex items-center space-x-1 bg-zinc-900 text-white border-zinc-700 hover:bg-zinc-800"
                           >
                             {video.haveUpvoted ? (
                               <ChevronDown className="h-4 w-4" />
@@ -481,21 +507,21 @@ export default function StreamView({
           </div>
           <div className="col-span-2 order-1 lg:order-2">
             <div className="space-y-4">
-              <Card className="bg-gray-800 border-gray-700 shadow-lg">
+              <Card className="bg-zinc-900 border-zinc-800 shadow-lg">
                 <CardContent className="p-6 space-y-4">
-                  <h2 className="text-2xl font-bold text-white">Add a song</h2>
+                  <h2 className="font-primary text-2xl font-bold text-white">Add a song</h2>
                   <form onSubmit={handleSubmit} className="space-y-3">
                     <Input
                       type="text"
                       placeholder="Paste YouTube link here"
                       value={inputLink}
                       onChange={(e) => setInputLink(e.target.value)}
-                      className="bg-gray-700 text-white border-gray-600 placeholder-gray-400"
+                      className="bg-zinc-800 text-white border-zinc-700 placeholder-gray-500"
                     />
                     <Button
                       disabled={loading}
                       type="submit"
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white transition-colors"
+                      className="w-full bg-white hover:bg-gray-100 text-black transition-colors font-semibold"
                     >
                       {loading ? "Loading..." : "Add to Queue"}
                     </Button>
@@ -510,9 +536,9 @@ export default function StreamView({
                   )}
                 </CardContent>
               </Card>
-              <Card className="bg-gray-800 border-gray-700 shadow-lg">
+              <Card className="bg-zinc-900 border-zinc-800 shadow-lg">
                 <CardContent className="p-6 space-y-4">
-                  <h2 className="text-2xl font-bold text-white">Now Playing</h2>
+                  <h2 className="font-primary text-2xl font-bold text-white">Now Playing</h2>
                   {currentVideo ? (
                     <div>
                       {playVideo ? (
@@ -544,7 +570,7 @@ export default function StreamView({
                     <Button
                       disabled={playNextLoader}
                       onClick={playNext}
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white transition-colors"
+                      className="w-full bg-white hover:bg-gray-100 text-black transition-colors font-semibold"
                     >
                       <Play className="mr-2 h-4 w-4" />{" "}
                       {playNextLoader ? "Loading..." : "Play next"}

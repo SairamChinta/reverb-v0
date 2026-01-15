@@ -20,6 +20,24 @@ export const useSocket = ({
     const [reconnectAttempts, setReconnectAttempts] = useState(0);
     const socketRef = useRef<Socket | null>(null);
 
+    // Use refs to store the latest callbacks without triggering reconnections
+    const callbacksRef = useRef({
+        onQueueUpdate,
+        onVoteUpdate,
+        onSongChange,
+        onSongAdded,
+    });
+
+    // Update refs when callbacks change
+    useEffect(() => {
+        callbacksRef.current = {
+            onQueueUpdate,
+            onVoteUpdate,
+            onSongChange,
+            onSongAdded,
+        };
+    }, [onQueueUpdate, onVoteUpdate, onSongChange, onSongAdded]);
+
     const connect = useCallback(() => {
         if (socketRef.current?.connected) {
             return;
@@ -57,25 +75,33 @@ export const useSocket = ({
             setReconnectAttempts((prev) => prev + 1);
         });
 
-        // Event listeners
-        if (onQueueUpdate) {
-            socket.on("queue-update", onQueueUpdate);
-        }
+        // Event listeners - use wrapper functions that reference the latest callbacks
+        socket.on("queue-update", (data) => {
+            if (callbacksRef.current.onQueueUpdate) {
+                callbacksRef.current.onQueueUpdate(data);
+            }
+        });
 
-        if (onVoteUpdate) {
-            socket.on("vote-update", onVoteUpdate);
-        }
+        socket.on("vote-update", (data) => {
+            if (callbacksRef.current.onVoteUpdate) {
+                callbacksRef.current.onVoteUpdate(data);
+            }
+        });
 
-        if (onSongChange) {
-            socket.on("song-change", onSongChange);
-        }
+        socket.on("song-change", (data) => {
+            if (callbacksRef.current.onSongChange) {
+                callbacksRef.current.onSongChange(data);
+            }
+        });
 
-        if (onSongAdded) {
-            socket.on("song-added", onSongAdded);
-        }
+        socket.on("song-added", (data) => {
+            if (callbacksRef.current.onSongAdded) {
+                callbacksRef.current.onSongAdded(data);
+            }
+        });
 
         return socket;
-    }, [creatorId, onQueueUpdate, onVoteUpdate, onSongChange, onSongAdded]);
+    }, [creatorId]); // Only depends on creatorId now!
 
     useEffect(() => {
         // First, trigger socket initialization by hitting the endpoint

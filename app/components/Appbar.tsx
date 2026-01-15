@@ -19,22 +19,21 @@ export function Appbar() {
   };
 
   return (
-    <header className="bg-slate-800 fixed top-0 w-full px-40 z-50 border-b border-slate-700 bg-background/80 backdrop-blur-sm bg-pink text-white">
+    <header className="bg-black fixed top-0 w-full px-40 z-50 border-b border-zinc-800 backdrop-blur-sm text-white">
       <nav className="container flex h-16 items-center justify-between">
         <div className="italic text-3xl font-extrabold">
           <Image
-            src="/reverb-new.png"
+            src="/rvb.jpeg"
             alt="Logo"
-            width={160}
-            height={136}
-            className="w-40 h-[136px]"
+            width={150}
+            height={25}
           />
         </div>
         <div className="flex items-center gap-4">
           <Providers>
             <AuthButtons />
           </Providers>
-          <Button className="bg-purple-600 hover:bg-purple-700 transition-colors duration-200" onClick={handleGetStarted}>Get Started</Button>
+          <Button className="bg-white hover:bg-gray-100 text-black transition-colors duration-200 font-semibold" onClick={handleGetStarted}>Get Started</Button>
         </div>
       </nav>
     </header>
